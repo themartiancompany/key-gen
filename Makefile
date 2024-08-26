@@ -19,7 +19,7 @@ install: install-scripts install-doc
 
 install-scripts:
 
-	install -vDm 755 key-gen/key-gen/key-gen "$(BIN_DIR)/key-gen"
+	install -vDm 755 key-gen/key-gen "$(BIN_DIR)/key-gen"
 
 install-doc:
 
