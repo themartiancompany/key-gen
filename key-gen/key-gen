@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+_bin="$( \
+  dirname \
+    "$( \
+      command \
+        -v \
+	  "env")")"
+_lib="${_bin}/../lib"
+source \
+  "${_lib}/libcrash-bash/crash-bash"
+
+# shellcheck disable=SC2034
+_global_variables() {
+  key_type=""
+  key_length=""
+  out_file=""
+  color=""
+  quiet=""
+}
+
+_requirements() {
+  _check_cmd \
+      'dd'
+}
+
+# Generates an encryption key when the "auto" value
+# has been specified for an <image>_encryption_key
+# variable in profiledef.sh
+# $1: output file path
+# $2: mode (binary/random plain)
+_key_gen() {
+  local \
+    _out="${1}" \
+    _type="${2}" \
+    _length="${3}" \
+    _size="${4}" \
+    _mode
+  if [ "${_type}" == "binary" ]; then
+    _mode="Binary key file"
+    dd \
+      if=/dev/random \
+      bs="${_size}" \
+      count=1 \
+      of="${_out}" > \
+      /dev/null 2>&1
+  elif [ "${_type}" == "plain" ]; then
+    _mode="random plaitext password"
+    printf \
+      "%s" \
+      "$(tr \
+           -dc \
+	     A-Za-z0-9 </dev/urandom | \
+          head \
+	    -c \
+	      ${_length} ; \
+            echo '')" > \
+      "${_out}"
+  fi
+  _msg_info "${_mode} for ${_out}"
+}
+
+_set_overrides() {
+  _set_override \
+    "key" \
+    "type" \
+    "plain"
+  _set_override \
+    "key" \
+    "size" \
+    "512"
+  _set_override \
+    "key" \
+    "length" \
+    "20"
+  if [[ -v override_quiet ]]; then
+    quiet="${override_quiet}"
+  elif [[ -z "${quiet}" ]]; then
+    quiet="y"
+  fi
+  if [[ -v override_color ]]; then
+    color="${override_color}"
+  elif [[ -z "${color}" ]]; then
+    color="n"
+  fi
+}
+
+# Show help usage, with an exit status.
+# $1: exit status number.
+_usage() {
+  local \
+    _usage_text
+  IFS='' \
+    read \
+      -r \
+      -d '' \
+      _usage_text << \
+        ENDUSAGETEXT || true
+Generate a binary key or an human readable password.
+usage:
+  $(_get "app" "name")
+    [options]
+    <key>
+  options:
+     -t <type>            Key type (binary, plain)
+                          Default: $(_get "key" "type")
+     -L <length>          Password length
+                          Default: $(_get "key" "length")
+     -S <size>            Key file size
+                          Default: $(_get "key" "size")
+     -h                   This message.
+     -c                   Enable color output
+     -v                   Enable verbose output
+ENDUSAGETEXT
+  _printf \
+    '%s\n' \
+    "${_usage_text}"
+  exit \
+    "${1}"
+}
+
+# Shows configuration options.
+_show_config() {
+  local \
+    _gen_date
+  TZ=UTC \
+    printf \
+      -v _get_date \
+      '%(%FT%R%z)T' \
+      "${SOURCE_DATE_EPOCH}"
+  _msg_info "${app_name} configuration"
+  _msg_info "           Operation date:   $(_get "_gen" "date")"
+  _msg_info "                 Key type:   $(_get "key" "type")"
+  _msg_info "                 Key size:   $(_get "key" "size")"
+  _msg_info "               Key length:   $(_get "key" "length")"
+  _msg_info "                 Out file:   $(_get "out" "file")"
+}
+
+_globals
+_global_variables
+_requirements
+_config_user_init \
+  "$(_get \
+       "app" \
+       "name")"
+# shellcheck disable=SC2034
+while \
+  getopts \
+    't:L:S:cvh?' \
+    arg; do
+  case \
+    "${arg}" in
+    t) override_key_type="${OPTARG}" ;;
+    L) override_key_length="${OPTARG}" ;;
+    S) override_key_size="${OPTARG}" ;;
+    c) override_color="y" ;;
+    v) override_quiet="n" ;;
+    h|?) _set_overrides && \
+         _usage \
+           0 ;;
+    *)
+    _msg_error \
+      "Invalid argument '${arg}'" \
+      0
+    _usage \
+      1
+    ;;
+  esac
+done
+shift \
+  $(( \
+    OPTIND - 1 \
+  ))
+if (( $# < 1 )); then
+  _msg_error \
+    "no out file given" \
+    0
+  _set_overrides
+  _usage \
+    1
+fi
+_set \
+  "out" \
+  "file" \
+  "${1}"
+_set_overrides
+_config_user_init \
+  "$( \
+    _get \
+      "app" \
+      "name")"
+_show_config
+app_opts=(
+  "$( \
+    _get \
+      "out" \
+      "file")"
+  "$( \
+    _get \
+      "key" \
+      "type")"
+  "$( \
+    _get \
+      "key" \
+      "length")"
+ "$( \
+    _get \
+      "key" \
+      "size")"
+)
+_key_gen \
+  "${app_opts[@]}"
+
+# vim:set sw=2 sts=-1 et:
