@@ -48,7 +48,7 @@ _key_gen() {
       of="${_out}" > \
       /dev/null 2>&1
   elif [ "${_type}" == "plain" ]; then
-    _mode="random plaitext password"
+    _mode="random plaintext password"
     printf \
       "%s" \
       "$(tr \
@@ -60,10 +60,13 @@ _key_gen() {
             echo '')" > \
       "${_out}"
   fi
-  _msg_info "${_mode} for ${_out}"
 }
 
 _set_overrides() {
+  _set_override \
+    "out" \
+    "file" \
+    "/dev/stdout"
   _set_override \
     "key" \
     "type" \
@@ -174,18 +177,21 @@ shift \
   $(( \
     OPTIND - 1 \
   ))
-if (( $# < 1 )); then
-  _msg_error \
-    "no out file given" \
-    0
-  _set_overrides
-  _usage \
-    1
+# if (( $# < 1 )); then
+#   _msg_error \
+#     "no out file given" \
+#     0
+#   _set_overrides
+#   _usage \
+#     1
+# fi
+#
+if (( 0 < $# )); then
+  _set \
+    "out" \
+    "file" \
+    "${1}"
 fi
-_set \
-  "out" \
-  "file" \
-  "${1}"
 _set_overrides
 _config_user_init \
   "$( \
