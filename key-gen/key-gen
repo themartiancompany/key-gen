@@ -16,6 +16,7 @@ source \
 _global_variables() {
   key_type=""
   key_length=""
+  key_size=""
   out_file=""
   color=""
   quiet=""
