@@ -40,6 +40,9 @@ _key_gen() {
     _size="${4}" \
     _mode
   if [ "${_type}" == "binary" ]; then
+    if [[ "${_out}" == "" ]]; then
+      _out="/dev/stdout"
+    fi
     _check_cmd \
       'dd'
     _mode="binary key file"
@@ -50,6 +53,9 @@ _key_gen() {
       of="${_out}" > \
       /dev/null 2>&1
   elif [ "${_type}" == "plain" ]; then
+    if [[ "${_out}" == "" ]]; then
+      _out="/dev/stdout"
+    fi
     _mode="random plaintext password"
     printf \
       "%s" \
@@ -74,7 +80,7 @@ _set_overrides() {
   _set_override \
     "out" \
     "file" \
-    "/dev/stdout"
+    ""
   _set_override \
     "key" \
     "type" \
