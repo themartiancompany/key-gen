@@ -69,7 +69,8 @@ _key_gen() {
       "${_out}"
   elif [ "${_type}" == "seed" ]; then
     _check_cmd \
-      'mkseed'
+      'mkseed' \
+      'evm-wallet'
     _mode="plain seed phrase"
     mkseed \
       "${_out}"
@@ -116,7 +117,7 @@ _usage() {
       -d '' \
       _usage_text << \
         ENDUSAGETEXT || true
-Generate a binary key or an human readable password.
+Generates a random binary key, an human readable password or seed phrase.
 usage:
   $(_get "app" "name")
     [options]
@@ -191,15 +192,6 @@ shift \
   $(( \
     OPTIND - 1 \
   ))
-# if (( $# < 1 )); then
-#   _msg_error \
-#     "no out file given" \
-#     0
-#   _set_overrides
-#   _usage \
-#     1
-# fi
-#
 if (( 0 < $# )); then
   _set \
     "out" \
