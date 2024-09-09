@@ -24,7 +24,7 @@ _global_variables() {
 
 _requirements() {
   _check_cmd \
-      'dd'
+      'tr'
 }
 
 # Generates an encryption key when the "auto" value
@@ -40,7 +40,9 @@ _key_gen() {
     _size="${4}" \
     _mode
   if [ "${_type}" == "binary" ]; then
-    _mode="Binary key file"
+    _check_cmd \
+      'dd'
+    _mode="binary key file"
     dd \
       if=/dev/random \
       bs="${_size}" \
@@ -58,6 +60,12 @@ _key_gen() {
 	    -c \
 	      ${_length} ; \
             echo '')" > \
+      "${_out}"
+  elif [ "${_type}" == "seed" ]; then
+    _check_cmd \
+      'mkseed'
+    _mode="plain seed phrase"
+    mkseed \
       "${_out}"
   fi
 }
@@ -108,7 +116,7 @@ usage:
     [options]
     <key>
   options:
-     -t <type>            Key type (binary, plain)
+     -t <type>            Key type (binary, plain, seed)
                           Default: $(_get "key" "type")
      -L <length>          Password length
                           Default: $(_get "key" "length")
