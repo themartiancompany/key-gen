@@ -79,6 +79,7 @@ _key_gen() {
       'evm-wallet'
     _mode="plain seed phrase"
     mkseed \
+      "${_mkseed_opts[@]}" \
       "${_out}"
   fi
 }
