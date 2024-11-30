@@ -38,6 +38,7 @@ _key_gen() {
     _type="${2}" \
     _length="${3}" \
     _size="${4}" \
+    _mkseed_opts=() \
     _mode
   if [ "${_type}" == "binary" ]; then
     if [[ "${_out}" == "" ]]; then
@@ -68,6 +69,11 @@ _key_gen() {
             echo '')" > \
       "${_out}"
   elif [ "${_type}" == "seed" ]; then
+    if [[ "${quiet}" == "n" ]]; then
+      _mkseed_opts+=(
+        -v
+      )
+    fi
     _check_cmd \
       'mkseed' \
       'evm-wallet'
@@ -78,6 +84,16 @@ _key_gen() {
 }
 
 _set_overrides() {
+  if [[ -v override_quiet ]]; then
+    quiet="${override_quiet}"
+  elif [[ -z "${quiet}" ]]; then
+    quiet="y"
+  fi
+  if [[ -v override_color ]]; then
+    color="${override_color}"
+  elif [[ -z "${color}" ]]; then
+    color="n"
+  fi
   _set_override \
     "out" \
     "file" \
@@ -94,16 +110,6 @@ _set_overrides() {
     "key" \
     "length" \
     "20"
-  if [[ -v override_quiet ]]; then
-    quiet="${override_quiet}"
-  elif [[ -z "${quiet}" ]]; then
-    quiet="y"
-  fi
-  if [[ -v override_color ]]; then
-    color="${override_color}"
-  elif [[ -z "${color}" ]]; then
-    color="n"
-  fi
 }
 
 # Show help usage, with an exit status.
