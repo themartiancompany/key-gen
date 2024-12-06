@@ -82,6 +82,9 @@ _key_gen() {
       "${_mkseed_opts[@]}" \
       "${_out}"
   fi
+  chmod \
+    400 \
+    "${_out}"
 }
 
 _set_overrides() {
