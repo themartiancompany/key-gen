@@ -134,11 +134,11 @@ usage:
     <key>
   options:
      -t <type>            Key type (binary, plain, seed)
-                          Default: $(_get "key" "type")
+                          Default: ${key_type}
      -L <length>          Password length
-                          Default: $(_get "key" "length")
+                          Default: ${key_length}
      -S <size>            Key file size
-                          Default: $(_get "key" "size")
+                          Default: ${key_size}
      -h                   This message.
      -c                   Enable color output
      -v                   Enable verbose output
@@ -160,11 +160,11 @@ _show_config() {
       '%(%FT%R%z)T' \
       "${SOURCE_DATE_EPOCH}"
   _msg_info "${app_name} configuration"
-  _msg_info "           Operation date:   $(_get "_gen" "date")"
-  _msg_info "                 Key type:   $(_get "key" "type")"
-  _msg_info "                 Key size:   $(_get "key" "size")"
-  _msg_info "               Key length:   $(_get "key" "length")"
-  _msg_info "                 Out file:   $(_get "out" "file")"
+  _msg_info "           Operation date:   ${_gen_date}"
+  _msg_info "                 Key type:   ${key_type}"
+  _msg_info "                 Key size:   ${key_size}"
+  _msg_info "               Key length:   ${key_length}"
+  _msg_info "                 Out file:   ${out_file}"
 }
 
 _globals
@@ -210,28 +210,13 @@ if (( 0 < $# )); then
 fi
 _set_overrides
 _config_user_init \
-  "$( \
-    _get \
-      "app" \
-      "name")"
+  "${app_name}"
 _show_config
 app_opts=(
-  "$( \
-    _get \
-      "out" \
-      "file")"
-  "$( \
-    _get \
-      "key" \
-      "type")"
-  "$( \
-    _get \
-      "key" \
-      "length")"
- "$( \
-    _get \
-      "key" \
-      "size")"
+  "${out_file}"
+  "${key_type}"
+  "${key_length}"
+  "${key_size}"
 )
 _key_gen \
   "${app_opts[@]}"
